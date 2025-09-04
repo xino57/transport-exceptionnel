@@ -11,6 +11,7 @@ export default function AddObstacle() {
     const {
         control,
         handleSubmit,
+        reset,    
         formState: { errors },
     } = useForm({
         defaultValues: { title: "", description: "" },
@@ -38,8 +39,10 @@ export default function AddObstacle() {
             longitude: coords?.lng,
         };
 
-        console.log("Obstacle:", newObstacle);
+        
         await addObstacle(newObstacle);
+        reset({ title: "", description: "" });
+        setCoords(null);
         router.back();
     };
 

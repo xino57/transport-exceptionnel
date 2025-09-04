@@ -20,7 +20,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Liste des Obstacles</Text>
+      <Text style={styles.title}>Liste des obstacles sur votre route</Text>
       {obstacles.length > 0 ? (
         <FlatList
           data={obstacles}
@@ -46,7 +46,7 @@ export default function Index() {
           )}
         />
       ) : (
-        <Text style={styles.emptyText}>Aucun obstacle</Text>
+        <Text style={styles.emptyText}>Vous êtes chanceux, aucun obstacle sur votre route</Text>
       )}
 
       <EditObstacleModal
