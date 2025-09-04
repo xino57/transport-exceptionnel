@@ -1,28 +1,42 @@
+import React, { useState } from "react";
 import { View, Text, Button, FlatList, StyleSheet } from "react-native";
 import { Link } from "expo-router";
-import { useObstacles } from "@/storage/storageObstacles";
+import { useObstacles, Obstacle } from "@/storage/storageObstacles";
+import EditObstacleModal from "@/components/EditObstacleModal";
 
-export default function Home() {
-  const { obstacles, removeObstacle } = useObstacles();
+
+
+export default function Index() {
+  const { obstacles, removeObstacle, updateObstacle, reload } = useObstacles();
+
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedObstacle, setSelectedObstacle] = useState<Obstacle | null>(null);
+
+  const openEdit = (obstacle: Obstacle) => {
+    setSelectedObstacle(obstacle);
+    setModalVisible(true);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Liste des Obstacles</Text>
-
       {obstacles.length > 0 ? (
         <FlatList
           data={obstacles}
+          extraData={obstacles}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ alignItems: "center" }}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDescription}>{item.description}</Text>
+              <Text style={styles.cardTitle}>Titre: {item.title}</Text>
+              <Text style={styles.cardDescription}>Description: {item.description}</Text>
               {item.latitude && item.longitude && (
                 <Text style={styles.cardCoords}>
                   Latitude: {item.latitude.toFixed(4)}, Longitude: {item.longitude.toFixed(4)}
                 </Text>
               )}
+              <Button title="Modifier" onPress={() => openEdit(item)} />
               <Button
                 title="Supprimer"
                 color="red"
@@ -34,6 +48,14 @@ export default function Home() {
       ) : (
         <Text style={styles.emptyText}>Aucun obstacle</Text>
       )}
+
+      <EditObstacleModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        obstacle={selectedObstacle}
+        onUpdate={updateObstacle}
+        onUpdated={reload}
+      />
 
       <View style={styles.buttons}>
         <View style={styles.buttonWrapper}>

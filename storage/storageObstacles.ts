@@ -16,22 +16,17 @@ export function useObstacles() {
   const load = async () => {
     try {
       const data = await AsyncStorage.getItem("obstacles");
-      if (data) {
-        const parsed = JSON.parse(data);
-        setObstacles(parsed);
-      } else {
-        setObstacles([]);
-      }
+      setObstacles(data ? JSON.parse(data) : []);
     } catch (error) {
       console.error("Erreur lors du chargement:", error);
     }
   };
 
+  const reload = useCallback(load, []);
 
   useEffect(() => {
     load();
   }, []);
-
 
   useFocusEffect(
     useCallback(() => {
@@ -39,36 +34,37 @@ export function useObstacles() {
     }, [])
   );
 
-  const save = async (list: Obstacle[]) => {
+  const persist = async (list: Obstacle[]) => {
     try {
-      setObstacles(list);
       await AsyncStorage.setItem("obstacles", JSON.stringify(list));
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
     }
   };
 
-
   const addObstacle = async (obs: Obstacle) => {
-    try {
-      const data = await AsyncStorage.getItem("obstacles");
-      const current = data ? JSON.parse(data) : [];
-      const updated = [...current, obs];
-      await save(updated);
-    } catch (error) {
-      console.error("Erreur lors de l'ajout:", error);
-    }
+    setObstacles(prev => {
+      const updated = [...prev, obs];
+      persist(updated);
+      return updated;
+    });
   };
-
 
   const removeObstacle = async (id: string) => {
-    try {
-      const updated = obstacles.filter((o) => o.id !== id);
-      await save(updated);
-    } catch (error) {
-      console.error(" Erreur lors de la suppression:", error);
-    }
+    setObstacles(prev => {
+      const updated = prev.filter(o => o.id !== id);
+      persist(updated);
+      return updated;
+    });
   };
 
-  return { obstacles, addObstacle, removeObstacle };
+  const updateObstacle = async (id: string, updatedFields: Partial<Obstacle>) => {
+    setObstacles(prev => {
+      const updated = prev.map(o => (o.id === id ? { ...o, ...updatedFields } : o));
+      persist(updated);
+      return updated;
+    });
+  };
+
+  return { obstacles, addObstacle, removeObstacle, updateObstacle, reload };
 }
