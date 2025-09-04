@@ -1,75 +1,111 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet } from "react-native";
+import { Link } from "expo-router";
+import { useObstacles } from "@/storage/storageObstacles";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function Home() {
+  const { obstacles, removeObstacle } = useObstacles();
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <Text style={styles.title}>Liste des Obstacles</Text>
+
+      {obstacles.length > 0 ? (
+        <FlatList
+          data={obstacles}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ alignItems: "center" }}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardDescription}>{item.description}</Text>
+              {item.latitude && item.longitude && (
+                <Text style={styles.cardCoords}>
+                  Latitude: {item.latitude.toFixed(4)}, Longitude: {item.longitude.toFixed(4)}
+                </Text>
+              )}
+              <Button
+                title="Supprimer"
+                color="red"
+                onPress={() => removeObstacle(item.id)}
+              />
+            </View>
+          )}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      ) : (
+        <Text style={styles.emptyText}>Aucun obstacle</Text>
+      )}
+
+      <View style={styles.buttons}>
+        <View style={styles.buttonWrapper}>
+          <Link href="/addObstacles" asChild>
+            <Button title="Ajouter un obstacle" />
+          </Link>
+        </View>
+
+        <View style={styles.buttonWrapper}>
+          <Link href="/contact" asChild>
+            <Button title="Voir les contacts utiles" />
+          </Link>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 16,
+    paddingTop: 40,
+    backgroundColor: "#f5f6fa",
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#555",
+    marginTop: 20,
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 12,
+    width: 280,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontWeight: "bold",
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  cardDescription: {
+    fontSize: 14,
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  cardCoords: {
+    fontSize: 13,
     marginBottom: 8,
+    color: "#333",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttons: {
+    marginTop: 30,
+    alignItems: "center",
+  },
+  buttonWrapper: {
+    marginVertical: 6,
+    width: 220,
   },
 });
